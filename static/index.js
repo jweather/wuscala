@@ -59,7 +59,7 @@ $(window).load(function() {
 		page($(this).data('page'));
 	});
 	
-	$('#preview .window').droppable({drop: dragDrop, hoverClass: 'ui-drop-hover'});
+	$('#preview .window').droppable({drop: dragDrop, hoverClass: 'ui-drop-hover', tolerance: 'pointer'});
 	
 }); // window.load
 
