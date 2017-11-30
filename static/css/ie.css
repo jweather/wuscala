@@ -1,0 +1,9 @@
+.previewFrame {
+	width: 960px; height: 540px;
+	-ms-zoom: 0.25;
+}
+
+.qPreviewFrame {
+	width: 1920px; height: 1080px;
+	-ms-zoom: 0.1;
+}
