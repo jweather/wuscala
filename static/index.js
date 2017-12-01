@@ -160,7 +160,7 @@ function updateState(newState) {
 
 function contentType(fname) {
 	var ext = fname.split('.').pop().toLowerCase();
-	if (ext == 'png' || ext == 'jpg' || ext == 'gif') return 'image';
+	if (ext == 'png' || ext == 'jpg' || ext == 'jpeg' || ext == 'gif') return 'image';
 	if (ext == 'mov' || ext == 'mp4' || ext == 'wmv') return 'video';
 	return 'unknown';
 }
