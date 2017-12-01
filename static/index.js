@@ -122,7 +122,7 @@ $(document).on('change', '#playbackLayout', function(e) {
 	});
 });
 
-var previewW = 192, previewH = 108;
+var previewW = 384, previewH = 216;
 
 function updateState(newState) {
 	var changed = false;
@@ -269,6 +269,7 @@ function apiUpload(file, fname) {
 			console.log('upload errors ' + textStatus);
 			$('#fUploading').hide();
 			uploading = false;
+			$('#fUploaded').show().delay(3000).hide(0);
 		}
 	});	
 	return;
