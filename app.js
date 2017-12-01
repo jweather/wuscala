@@ -48,12 +48,13 @@ app.post('/upload/:file', multipart({uploadDir: process.cwd() + '\\upload'}), fu
 	var file = req.files['upload'];
 	console.log(file)
 	var tempName = file.path;
-	var fName = process.cwd() + '\\static\\uploads\\' + req.params.file;
+	var fName = site.contentRoot + '\\' + req.params.file;
 	
 	console.log('temp file = ' + tempName + ', destination = ' + fName);
 	fs.rename(tempName, fName, function(err) {
 		if (err) console.log('rename error', err);
 		res.send({fname: req.params.file});
+		refreshDirectory();
 	});
 });
 
