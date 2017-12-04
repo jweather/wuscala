@@ -32,9 +32,8 @@
         </div>
         <div class="collapse navbar-collapse">
           <ul class="nav navbar-nav">
-            <li class="active"><a href="#" data-page="playback">Playback</a></li>
-						<li><a href="#" data-page="manage">Manage</a></li>
-						<li><a href="#" data-page="upload">Upload</a></li>
+            <li class="active"><a href="#" data-page="survey">Survey</a></li>
+						<li><a href="#" data-page="videos">Videos</a></li>
           </ul>
         </div>
       </div>
@@ -42,110 +41,35 @@
 
 	<img src="ajax-loader.gif" id="startupLoader">
     <div id="pageContainer" class="hidden">
-		<div class="page" data-page="login">
-			<table border="0" cellpadding="50">
-				<tr><td width="50%">
+		<div class="page" data-page="survey">
+			<h3>Capture test</h3>
+			<button id="capture0">Capture Off</button>
+			<button id="capture1">Capture On</button>
+			
+		
+			<h3>Survey</h3>
+			<p>Please answer the following questions:</p>
+			
+			<p><h4>Which answer did you choose?</h4>
+			<br/><input type="radio" name="question1" id="question1A" value="A">
+				<label for="question1A">Answer A</label>
+			<br/><input type="radio" name="question1" id="question1B" value="B">
+				<label for="question1B">Answer B</label>
+			<br/><input type="radio" name="question1" id="question1C" value="C">
+				<label for="question1C">Answer C</label>
+			<br/><input type="radio" name="question1" id="question1D" value="D">
+				<label for="question1D">Answer D</label>
 				
-					<h3 style="color: #0871de;">Please log in below</h3>
-
-					<table border="0" cellpadding="5">
-						<tr><td><label for="loginUser">User name</label></td>
-							<td><input type="text" class="form-style" id="loginUser"/></td>
-						</tr>
-						<tr><td><label for="loginPass">Password</label></td>
-							<td><input type="password" class="form-style" id="loginPass"/></td>
-						</tr>
-					</table>
-					<button id="login" class="btn btn-primary">Login</button>
-					<span id="loginError"></span>
-				</td>
-			</table>
+			<p><button type="submit" id="surveySubmit">Submit</button></p>
 		</div>
-
-		<div class="page" data-page="playback">
-			<h3>Playback</h3>
-			<p>Drag content from the library into any of the onscreen windows below.</p>
+				
+		<div class="page" data-page="videos">
+			<h3>Videos</h3>
+			<p>Select a video from the list below to play back.</p>
 			
-			<p><label>Layout Preset
-			<select id="playbackLayout">
-				<option value="1">Layout 1</option>
-				<option value="2">Layout 2</option>
-				<option value="3">Layout 3</option>
-				<option value="4">Layout 4</option>
-				<option value="5">Layout 5</option>
-				<option value="6">Layout 6</option>
-			</select></label>
-			<img src="ajax-loader.gif" class="hidden" id="playbackLayoutSpin">
-			</p>
-			
-			<div id="playbackLibrary" class="library"></div>
-			
-			<div id="preview">
-				<div id="playbackWindow0" class="window" data-window="0"></div>
-				<div id="playbackWindow1" class="window" data-window="1"></div>
-				<div id="playbackWindow2" class="window" data-window="2"></div>
-				<div id="playbackWindow3" class="window" data-window="3"></div>
-				<div id="playbackWindow4" class="window" data-window="4"></div>
-				<div id="playbackWindow5" class="window" data-window="5"></div>
-			</div>
-		</div>
-
-		<div class="page" data-page="manage">
-			<h3>Manage</h3>
-			<p>Tag and categorize content items below.</p>
+			<div id="library"/>
 			
 		</div>
-		
-		<div class="page" data-page="upload">
-			<h3>Upload</h3>
-			<p>Upload new content items below.</p>
-			
-			<input type="file" class="form-control" id="fUpload">
-						<div id="fUploading">Uploading...</div>
-						<div id="fUploaded" class="alert alert-success">Upload complete!</div>
-		</div>
-		
-		<div id="qModal" class="modal fade"><div class="modal-dialog"><div class="modal-content">
-			<div class="modal-header">
-				<button type="button" class="close" data-dismiss="modal">&times;</button>
-				<h4 class="modal-title">Edit Slide</h4>
-			</div>
-			<div class="modal-body">
-				<form role="form">
-					<div class="form-group">
-						<label>Name
-						<input type="text" id="qEditName" class="form-control" placeholder="Name"/></label>
-					</div>
-					<div class="form-group">
-						<label>Title (optional)
-						<input type="text" id="qEditTitle" class="form-control" placeholder="Title"/></label>
-					</div>
-					<div class="form-group">
-						<label>Subtitle (optional)
-						<input type="text" id="qEditSubtitle" class="form-control" placeholder="Subtitle"/></label>
-					</div>
-					<div class="form-group">
-						<label style="width: 500px;">Text
-						<textarea rows="5" cols="80" id="qEditText" class="form-control"></textarea></label>
-					</div>
-					<div class="form-group">
-						<label>Color
-						<select id="qEditBG" class="form-control"></select></label>
-					</div>
-					<div class="form-group">
-						<label>Photo
-						<input type="file" class="form-control" id="qEditUpload"></label>
-						<div id="qEditUploading">Uploading...</div>
-						<img id="qEditPhotoPreview">
-						<button type="button" id="qEditPhotoClear" class="btn btn-danger">Clear Photo</button>
-					</div>
-				</form>
-			</div>
-			<div class="modal-footer">
-				<button type="button" id="qSave" class="btn btn-primary">Save</button>
-				<button type="button" id="qDelete" class="btn btn-danger">Delete Slide</button>
-			</div>
-		</div></div></div> <!-- qModal -->
 		
     </div><!-- pageContainer -->
     

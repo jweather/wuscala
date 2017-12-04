@@ -1,3 +1,14 @@
+// Copyright 2017
+// Jeremy Weatherford
+// Zenith Systems
+
+// Developed as example code for Walsh University
+
+// This server manages realtime communications for:
+//  touchscreen kiosks -- webserver, REST API and websockets
+//  Scala Player channel script -- websockets
+//  Crestron control system -- TCP client
+
 var express = require('express')
  , cookieParser = require('cookie-parser')
  , logger = require('morgan')
@@ -5,25 +16,22 @@ var express = require('express')
  , bodyParser = require('body-parser')
  , http = require('http')
  , util = require('util')
- , fs = require('fs')
  , net = require('net')
- , process = require('process')
  , JSON5 = require('json5')
  , WebSocket = require('ws')
- , multipart = require('connect-multiparty')
  , request = require('request')
 ;
 
-// runtime
-var state = {layout: {preset: 5, sources: ['[laptop]', 'video2.mov', 'video3.mov', 'video4.mov', 'video5.mov', '[null]']}};
+// config
+var webport = 8000, wsport = 8001;
+var scalaAPI = 'http://scm.zenithav.net:8080/ContentManager/api/rest', scalaUser = 'api', scalaPass = 'Zenith5060';
 
+// survey demo app
+var surveyResults = [{A: 0, B: 0, C: 0, D: 0}];
 
-// DB
-var db = JSON5.parse(fs.readFileSync('db.json'));
-var site = JSON5.parse(fs.readFileSync('site.json'));
 
 var app = express();
-app.set('port', 3000);
+app.set('port', webport);
 app.set('view engine', 'ejs');
 
 app.use(cookieParser('WCMSSession'));
@@ -41,76 +49,37 @@ app.get('/', function(req, res) {
 	res.render('index');
 });
 
-// tested with 1.8GB mp4, no issues
-app.post('/upload/:file', multipart({uploadDir: process.cwd() + '\\upload'}), function(req, res) {
-	console.log('/upload');
-	if (!req.files || !req.files['upload']) return res.status(500).send('No files uploaded');
-	var file = req.files['upload'];
-	console.log(file)
-	var tempName = file.path;
-	var fName = site.contentRoot + '\\' + req.params.file;
-	
-	console.log('temp file = ' + tempName + ', destination = ' + fName);
-	fs.rename(tempName, fName, function(err) {
-		if (err) console.log('rename error', err);
-		res.send({fname: req.params.file});
-		refreshDirectory();
-	});
+app.get('/survey', function(req, res) {
+	res.render('survey');
 });
 
-app.post('/layout', function(req, res) {
-	var preset = req.body.preset;
-	state.layout.preset = preset;
-	touchState();
-	playbackClient.write('preset' + preset + '\r\n');
+app.post('/laptopOn', function(req, res) {
+	broadcast('laptop', 1);
 	res.sendStatus(200);
 });
 
-app.post('/route', function(req, res) {
-	var window = req.body.window;
-	var content = req.body.content;
-	
-	state.layout.sources[window] = content;
-	touchState();
-	
-	playbackClient.write(window + ' ' + content + '\r\n');
+app.post('/laptopOff', function(req, res) {
+	broadcast('laptop', 0);
 	res.sendStatus(200);
+});
+
+
+app.post('/survey', function(req, res) {
+	var responses = req.body.responses;
+	for (var i=0; i<responses.length; i++) {
+		surveyResults[i][responses[i]]++;
+	}
+	
+	broadcast('survey', surveyResults);
+	return res.sendStatus(200);
+	
+	res.sendStatus(404); // not a valid response
 });
 
 // express startup
 http.createServer(app).listen(app.get('port'), function() {
   console.log('Express server listening on port ' + app.get('port'));
 });
-
-
-// util
-var directoryBusy = false;
-function refreshDirectory() {
-	if (directoryBusy) return;
-	directoryBusy = true;
-	
-	var add = [], unmatched = [];
-	db.files.forEach(file => unmatched.push(file));
-	
-	fs.readdir(site.contentRoot, (err, files) => {
-		files.forEach(file => {
-			var i = unmatched.indexOf(file);
-			if (i == -1) {
-				console.log('adding file', file);
-				add.push(file);
-			} else {
-				unmatched.splice(i, 1);
-			}
-		});
-		if (add.length > 0 || unmatched.length > 0) {
-			console.log('refreshDirectory found changes:', add.length, 'new and', unmatched.length, 'deleted');
-			unmatched.forEach(file => db.files.splice(db.files.indexOf(file), 1));
-			db.files = db.files.concat(add).sort();
-			touchDB();
-		}
-		directoryBusy = false;
-	});
-}
 
 function cookieSession(name) {
   return function (req, res, next) {
@@ -124,23 +93,12 @@ function cookieSession(name) {
   }
 }
 
-function touchDB() {
-	fs.writeFileSync('db.json', JSON5.stringify(db, null, 4));
-	broadcast('db', db);
-}
-
-function touchState() {
-	broadcast('state', state);
-}
-	
 // websockets
-var wsport = 3001;
 var server = new WebSocket.Server({ port: wsport });
 console.log('Websocket server listening on port ' + wsport);
 
 server.on('connection', function(ws) {
-	ws.send(JSON.stringify({msg: 'state', data: state}));
-	ws.send(JSON.stringify({msg: 'db', data: db}));
+	ws.send(JSON.stringify({msg: 'survey', data: surveyResults}));
 	ws.on('message', function(msg) {
 		console.log('RX ', msg);
 	});
@@ -154,37 +112,35 @@ function broadcast(msg, data) {
 	});
 }
 
-// video directory refresh
-refreshDirectory();
-setInterval(refreshDirectory, 5*1000);
-
-// maintain connection to playback app
-var playbackClient = new net.Socket();
-function playbackConnect() {
-	playbackClient.connect(1138, '127.0.0.1');
+// maintain connection to Crestron to trigger laptop window
+var crestronConnected = false;
+var crestronClient = new net.Socket();
+function crestronConnect() {
+	crestronClient.connect(1138, '192.168.1.3');
 }
 
-playbackClient.on('connect', function() {
-	console.log('Playback client connected');
-	
-	// synchronize layout
-	playbackClient.write('preset' + state.layout.preset + '\r\n');
-	for (var i=0; i<6; i++) {
-		playbackClient.write(i + ' ' + state.layout.sources[i] + '\r\n');
-	}
+crestronClient.on('connect', function() {
+	console.log('crestron client connected');
+	crestronConnected = true;
 });
 
-playbackClient.on('data', data => {
-	console.log('playback client RX:', data);
+// todo: gather data by lines and parse
+crestronClient.on('data', data => {
+	console.log('crestron client RX:', data);
 });
 
-playbackClient.on('close', function() {
-	console.log('Playback client disconnected');
-	setTimeout(playbackConnect, 10*1000);
+crestronClient.on('close', function() {
+	console.log('crestron client disconnected');
+	crestronConnected = false;
+	setTimeout(crestronConnect, 10*1000);
 });
 
-playbackClient.on('error', function() {
-	console.log('Playback client connection refused');
+crestronClient.on('error', function() {
+	console.log('crestron client connection refused');
 });
-playbackConnect();
+//crestronConnect();
 
+setInterval(function() {
+	if (crestronConnected)
+		crestronClient.write('ping\n');
+}, 30*1000);
