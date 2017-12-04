@@ -69,11 +69,14 @@ app.post('/survey', function(req, res) {
 	for (var i=0; i<responses.length; i++) {
 		surveyResults[i][responses[i]]++;
 	}
-	
 	broadcast('survey', surveyResults);
 	return res.sendStatus(200);
 	
 	res.sendStatus(404); // not a valid response
+});
+
+app.get('/surveyResults', function(req, res) {
+	res.send(surveyResults);
 });
 
 // express startup

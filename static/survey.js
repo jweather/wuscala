@@ -1,7 +1,4 @@
-﻿
-$(window).load(() => {
-	
-}); // window.load
+﻿//note that Scala's built-in browser does not support ES6, specifically arrow lambdas
 
 function updateSurvey(results) {
 	var sum = 0;
@@ -9,11 +6,11 @@ function updateSurvey(results) {
 	var q1 = results[0];
 	var keys = Object.keys(q1);
 	
-	keys.forEach(key => {
+	keys.forEach(function(key) {
 		sum += q1[key];
 	});
 	
-	keys.forEach(key => {
+	keys.forEach(function(key) {
 		var pct = sum == 0 ? 0 : (q1[key] / sum);
 		var bar = $('#q1' + key);
 		bar.css({width: (pct*500)+'px'});
@@ -24,7 +21,7 @@ function updateSurvey(results) {
 // websocket
 var ws;
 var initted = false;
-$(window).load(() => {
+$(window).load(function() {
 	function connect() {
 		var url = 'ws://' + window.location.hostname + ':8001';
 		console.log('Connecting to ' + url);
@@ -38,6 +35,7 @@ $(window).load(() => {
 
 	function onOpen() {
 		console.log('WS open');
+		ws.send('survey results page connected');
 	};
 
 	function onError() {
