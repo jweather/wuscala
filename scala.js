@@ -1,7 +1,13 @@
 var request = require('request');
 
 var apiToken = null;
+var sessionID = null;
+
 var endpoint;
+
+
+exports.apiToken = function() { return apiToken; }
+exports.cookies = function() { return apiToken + ',' + sessionID; }
 
 exports.login = function(url, user, pass, cb) {
 	endpoint = url + '/api/rest';
@@ -20,7 +26,7 @@ exports.login = function(url, user, pass, cb) {
 exports.listVideos = function(catName, cb) {
 	api('get', '/categories', null, body => {
 		var catID = null;
-		if (!body) { return cb('category request failed'); }
+		if (!body.list) { return cb('category request failed'); }
 		body.list.forEach(cat => {
 			if (cat.name == catName) catID = cat.id;
 		});
@@ -49,8 +55,14 @@ function api(method, url, body, cb) {
     }
     request(opts, function(err, res, body) {
         if (err) {
-            console.log(err);
+            return console.log(err);
         }
+				var cookies = res.headers['set-cookie'];
+				if (cookies) {
+					var match = cookies[0].match(/JSESSIONID=([^;]+);/);
+					sessionID = match[1];
+					console.log('sessionID', sessionID);
+				}
         cb(body);
     });
 }

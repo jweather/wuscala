@@ -133,6 +133,18 @@ setInterval(() => {
 	});
 }, 1000);
 
+// proxy Scala content requests so we can set the session cookie -- works for thumbnails, not videos
+app.get('/scala/*', (req, res) => {
+	var url = scalaURL + '/' + req.params[0];
+	console.log('proxying to', url);
+	
+	var jar = request.jar();
+	jar.setCookie(request.cookie('token=' + scala.apiToken()), scalaURL);
+	
+	var req = request({url:url, jar:jar}).pipe(res);
+	res.pipe(req);
+});
+
 // express startup
 http.createServer(app).listen(app.get('port'), function() {
   console.log('Express server listening on port ' + app.get('port'));
@@ -152,8 +164,9 @@ function cookieSession(name) {
 
 function initialMsgs() {
 	return [
-		{topic: 'survey', data: surveyResults},
-		{topic: 'library', data: library}
+			{topic: 'survey', data: surveyResults},
+			{topic: 'library', data: library},
+			{topic: 'token', data: scalaURL + '/cookie.html#' + scala.cookies()}
 	];
 }
 
@@ -243,6 +256,8 @@ setInterval(function() {
 function refreshScala() {
 	scala.login(scalaURL, scalaUser, scalaPass, function(err) {
 		scala.listVideos(scalaCategory, function(err, res) {
+			if (err) return console.log('failed to refresh videos:', err);
+			broadcast('token', scalaURL + '/cookie.html#' + scala.cookies());
 			library = [];
 			res.forEach(video => {
 				library.push({name: video.name, filename: video.mediaItemFiles[0].filename,

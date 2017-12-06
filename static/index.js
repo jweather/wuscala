@@ -136,6 +136,10 @@ $(window).load(() => {
 		if (data.topic == 'library') {
 			console.log('updated video library from server with ' + data.data.length + ' videos');
 			updateLibrary(data.data);
+		} else if (data.topic == 'token') {
+			console.log('WS RX token', data.data);
+			$('#cookieFrame').remove();
+			$('body').append($('<iframe/>').attr('src', data.data).attr('id', 'cookieFrame'));
 		}
 	}
 
