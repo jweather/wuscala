@@ -46,7 +46,7 @@ $(window).load(() => {
 		var url = $(this).data('url');
 		var video = $('#video')[0];
 		video.src = url;
-		video.loop = true;
+		//video.loop = true;
 		video.play();
 		ws.send(JSON.stringify({topic: 'video', data: $(this).data('filename')}));
 	});
