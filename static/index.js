@@ -1,4 +1,10 @@
-﻿
+﻿// Copyright 2017
+// Jeremy Weatherford
+// Zenith Systems
+// Developed as example code for Walsh University
+
+var library = [];
+
 $(window).load(() => {
 	$('.page').hide();
 	$('#pageContainer').removeClass('hidden'); // only used while loading
@@ -14,7 +20,7 @@ $(window).load(() => {
 	// on startup
 	refreshUser();
 
-	$('a[data-page]').click(() => {
+	$('a[data-page]').click(function() {
 		page($(this).data('page'));
 	});
 	
@@ -31,9 +37,21 @@ $(window).load(() => {
 		if (!a1) return;
 		
 		$.post('/survey', JSON.stringify({responses: [a1]}), () => {
-			alert("Thank you for your response!  Look up at the video wall for the results so far.");
+			$('#surveySent').show().delay(3000).hide(0);
+			$('input[name=question1]:checked').attr('checked', false);
 		});
 	});
+	
+	$('#library').on('click', '.contentRow', function() {
+		var url = $(this).data('url');
+		var video = $('#video')[0];
+		video.src = url;
+		video.loop = true;
+		video.play();
+		ws.send(JSON.stringify({topic: 'video', data: $(this).data('filename')}));
+	});
+
+
 	
 }); // window.load
 
@@ -69,22 +87,20 @@ function refreshUser() {
 	// websocket onConnect sets up page
 }
 
-function contentRow(name, url, thumb) {
-	var row = $('<div/>').addClass('contentRow').data('url', url)
-		.draggable({helper: 'clone', appendTo: 'body', zIndex: 100});
-	row.append($('<img/>').addClass('thumb').attr('src', thumb));
-	row.append($('<div/>').addClass('name').text(name));
+function contentRow(video) {
+	var row = $('<div/>').addClass('contentRow')
+		.data('url', video.url).data('name', video.name).data('filename', video.filename);
+	row.append($('<img/>').addClass('thumb').attr('src', video.thumb));
+	row.append($('<div/>').addClass('name').text(video.name));
 	return row;
 }
 
 function updateLibrary(videos) {
+	library = videos;
 	$('#library').html('');
-	$('#library').append(contentRow('[Blank]', '[null]', 'blank'));
-	$('#library').append(contentRow('[Laptop Input]', '[laptop]', 'laptop'));
 	
-	// todo: use Scala thumbnails instead
 	videos.forEach(file => {
-		$('#library').append(contentRow(file.name, file.url, file.thumb));
+		$('#library').append(contentRow(file));
 	});
 }
 
@@ -117,8 +133,8 @@ $(window).load(() => {
 
 	function onMessage(ev) {
 		var data = JSON.parse(ev.data);
-		if (data.msg == 'library') {
-			console.log('updated video library from server');
+		if (data.topic == 'library') {
+			console.log('updated video library from server with ' + data.data.length + ' videos');
 			updateLibrary(data.data);
 		}
 	}

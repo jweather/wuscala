@@ -75,6 +75,11 @@ hidden {
 
 .contentRow:hover {
 	background-color: #9999ff;
+	cursor: pointer;
+}
+
+#playback {
+	float: left;
 }
 
 .question {
@@ -95,3 +100,4 @@ hidden {
 	background-color: #00ff00;
 	font-size: 40px;
 }
+

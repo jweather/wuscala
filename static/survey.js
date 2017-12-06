@@ -1,4 +1,9 @@
-﻿//note that Scala's built-in browser does not support ES6, specifically arrow lambdas
+﻿// Copyright 2017
+// Jeremy Weatherford
+// Zenith Systems
+// Developed as example code for Walsh University
+
+// note that Scala's built-in browser does not support ES6, specifically arrow lambdas
 
 function updateSurvey(results) {
 	var sum = 0;
@@ -35,7 +40,7 @@ $(window).load(function() {
 
 	function onOpen() {
 		console.log('WS open');
-		ws.send('survey results page connected');
+		//ws.send('survey results page connected');
 	};
 
 	function onError() {
@@ -44,7 +49,7 @@ $(window).load(function() {
 
 	function onMessage(ev) {
 		var data = JSON.parse(ev.data);
-		if (data.msg == 'survey') {
+		if (data.topic == 'survey') {
 			console.log('updated survey results', data.data);
 			updateSurvey(data.data);
 		}
