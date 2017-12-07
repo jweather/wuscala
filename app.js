@@ -266,7 +266,7 @@ function refreshScala() {
 			broadcast('token', scalaURL + '/cookie.html#' + scala.cookies());
 			
 			library = res.map(video => {
-				{name: video.name, filename: video.mediaItemFiles[0].filename,
+				return {name: video.name, filename: video.mediaItemFiles[0].filename,
 					url: scalaURL + video.downloadPath, 
 					thumb: scalaURL + video.thumbnailDownloadPaths.medium}
 			});
