@@ -1,9 +1,10 @@
 ﻿body {
   padding-top: 40px;
+	zoom: 200%;
 }
 #pageContainer {
   padding: 40px 15px;
-  max-width: 1400px;
+  max-width: 960px;
   margin-left: auto;
   margin-right: auto;
 }
@@ -48,7 +49,7 @@ hidden {
 }
 
 #library {
-	width: 500px;
+	width: 450px;
 	height: 800px;
 	float: left;
 	overflow-y: scroll;
@@ -101,3 +102,8 @@ hidden {
 	font-size: 40px;
 }
 
+#cookieFrame {
+	position: absolute;
+	left: 0px;
+	top: -200px;
+}

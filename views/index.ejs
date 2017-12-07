@@ -2,7 +2,7 @@
 <html>
   <head>
     <title>Walsh Video Wall CMS</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta name="viewport" content="width=device-width, initial-scale=2.0"/>
     <!-- Bootstrap -->
     <link href="css/bootstrap.css" rel="stylesheet" />
 		<link href="css/bootstrap-colorselector.css" rel="stylesheet" />
@@ -28,12 +28,13 @@
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
           </button>
-          <div class="navbar-brand">Walsh Video Wall</div>
+          <div class="navbar-brand">Walsh Demo Apps</div>
         </div>
         <div class="collapse navbar-collapse">
           <ul class="nav navbar-nav">
             <li class="active"><a href="#" data-page="survey">Survey</a></li>
 						<li><a href="#" data-page="videos">Videos</a></li>
+						<li><a href="#" data-page="capture">Capture</a></li>
           </ul>
         </div>
       </div>
@@ -42,11 +43,6 @@
 	<img src="ajax-loader.gif" id="startupLoader">
     <div id="pageContainer" class="hidden">
 		<div class="page" data-page="survey">
-			<h3>Capture test</h3>
-			<button id="capture0">Capture Off</button>
-			<button id="capture1">Capture On</button>
-			
-		
 			<h3>Survey</h3>
 			<p>Please answer the following questions:</p>
 			
@@ -60,7 +56,7 @@
 			<br/><input type="radio" name="question1" id="question1D" value="D">
 				<label for="question1D">Answer D</label>
 				
-			<p><button type="submit" id="surveySubmit">Submit</button></p>
+			<br/><br/><p><button type="submit" id="surveySubmit">Submit</button></p>
 			<div id="surveySent" style="display:none;" class="alert alert-success">Thank you for your response!  Look up at the video wall for the results so far.</div>
 		</div>
 				
@@ -71,11 +67,22 @@
 			<div id="library"></div>
 			
 			<div id="playback">
-				<video id="video" width="800" height="600">
+				<video id="video" width="450" height="300">
 			</div>
 			
 			
 		</div>
+		
+		<div class="page" data-page="capture">
+			<h3>Capture test</h3>
+			<button id="capture0">Capture Off</button>
+			<button id="capture1">Capture On</button>
+			
+			<div id="laptopSent" style="display:none;" class="alert alert-success">Updating...</div>
+			
+		</div>
+		
+
 		
     </div><!-- pageContainer -->
 		

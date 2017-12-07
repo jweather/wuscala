@@ -28,10 +28,12 @@ $(window).load(() => {
 	});
 	
 	$('#capture0').click(() => {
+		$('#laptopSent').show().delay(1000).hide(0);
 		$.post('/laptopOff', null, () => {});
 	});
 	
 	$('#capture1').click(() => {
+		$('#laptopSent').show().delay(1000).hide(0);
 		$.post('/laptopOn', null, () => {});
 	});
 	

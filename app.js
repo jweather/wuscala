@@ -263,7 +263,7 @@ function refreshScala() {
 			if (err) return console.log('failed to refresh videos:', err);
 			
 			// client browser needs these cookies set in order to stream video directly from Scala Content Manager
-			broadcast('token', scalaURL + '/cookie.html#' + scala.cookies());
+			broadcast('token', scalaURL + '/cookie.html?uniq=' + Math.random() + '#' + scala.cookies());
 			
 			library = res.map(video => {
 				return {name: video.name, filename: video.mediaItemFiles[0].filename,
