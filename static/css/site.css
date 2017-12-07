@@ -1,6 +1,9 @@
 ﻿body {
   padding-top: 40px;
 	zoom: 200%;
+	background-image: url("/watermark.png");
+	background-repeat: no-repeat;
+	background-position: center;
 }
 #pageContainer {
   padding: 40px 15px;
@@ -42,10 +45,8 @@ hidden {
   src: url('../fonts/glyphicons-halflings-regular.eot?#iefix') format('embedded-opentype'), url('../fonts/glyphicons-halflings-regular.woff') format('woff'), url('../fonts/glyphicons-halflings-regular.ttf') format('truetype'), url('../fonts/glyphicons-halflings-regular.svg#glyphicons-halflingsregular') format('svg');
 }
 
-.navbar-inverse .navbar-brand:hover, 
-.navbar-inverse .navbar-brand:focus {
-  background-color: transparent;
-  color: #999999;
+.navbar-inverse {
+	background-color: #fdc728;
 }
 
 #library {
