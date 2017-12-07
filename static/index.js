@@ -18,7 +18,10 @@ $(window).load(() => {
 	});
 
 	// on startup
-	refreshUser();
+	$('#loginError').text('');
+	$('#logout').hide();
+	
+	page('survey');
 
 	$('a[data-page]').click(function() {
 		page($(this).data('page'));
@@ -46,16 +49,16 @@ $(window).load(() => {
 		var url = $(this).data('url');
 		var video = $('#video')[0];
 		video.src = url;
-		//video.loop = true;
 		video.play();
+		
+		// notify Scala to play this video as well
 		ws.send(JSON.stringify({topic: 'video', data: $(this).data('filename')}));
 	});
-
-
 	
 }); // window.load
 
-function page(name, quiet) {
+// switch pages
+function page(name) {
 	var p = $('.page[data-page="' + name + '"]');
 	if (!p.length) {
 		alert("unknown page name: " + name);
@@ -68,23 +71,6 @@ function page(name, quiet) {
 	// li highlight
 	$('a[data-page]').parents('li').removeClass('active');
 	$('a[data-page="' + name + '"]').parents('li').addClass('active');
-	
-	if (quiet) return;
-
-	// need to refresh anything when switching pages?
-	switch (name) {
-		
-	}
-}
-
-function refreshUser() {
-	$('#loginError').text('');
-	$('#logout').hide();
-	
-	page('survey');
-
-	// no login required
-	// websocket onConnect sets up page
 }
 
 function contentRow(video) {
@@ -136,9 +122,13 @@ $(window).load(() => {
 		if (data.topic == 'library') {
 			console.log('updated video library from server with ' + data.data.length + ' videos');
 			updateLibrary(data.data);
+
 		} else if (data.topic == 'token') {
+			// browser has to have cookies set in order to stream video directly from Scala Content Manager
 			console.log('WS RX token', data.data);
 			$('#cookieFrame').remove();
+			
+			// effectively a XSS attack to set cookies for the Content Manager's domain
 			$('body').append($('<iframe/>').attr('src', data.data).attr('id', 'cookieFrame'));
 		}
 	}

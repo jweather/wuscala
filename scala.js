@@ -1,10 +1,16 @@
+// Copyright 2017
+// Jeremy Weatherford
+// Zenith Systems
+// Developed as example code for Walsh University
+
+// handle Scala Content Manager's REST API
+
 var request = require('request');
 
 var apiToken = null;
 var sessionID = null;
 
 var endpoint;
-
 
 exports.apiToken = function() { return apiToken; }
 exports.cookies = function() { return apiToken + ',' + sessionID; }
@@ -15,7 +21,7 @@ exports.login = function(url, user, pass, cb) {
 	api('post', '/auth/login', {username: user, password: pass},
 		function(body) {
 				if (!body) {
-					console.log('Scala login failed!');
+					cb('Scala login failed!');
 				} else {
 					apiToken = body.apiToken;
 					cb(null);
@@ -61,7 +67,6 @@ function api(method, url, body, cb) {
 				if (cookies) {
 					var match = cookies[0].match(/JSESSIONID=([^;]+);/);
 					sessionID = match[1];
-					console.log('sessionID', sessionID);
 				}
         cb(body);
     });

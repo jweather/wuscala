@@ -40,7 +40,6 @@ $(window).load(function() {
 
 	function onOpen() {
 		console.log('WS open');
-		//ws.send('survey results page connected');
 	};
 
 	function onError() {

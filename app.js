@@ -3,9 +3,9 @@
 // Zenith Systems
 // Developed as example code for Walsh University
 
-// This server manages realtime communications for:
+// Comms server manages realtime communications for:
 //  touchscreen kiosks -- webserver, REST API and websockets
-//  Scala Player channel script -- websockets
+//  Scala Player channel script -- long polling
 //  Scala Player content webpages -- websockets
 //  Crestron control system -- TCP client
 
@@ -32,14 +32,14 @@ var scalaCategory = 'Walsh Kiosk Videos';
 // survey demo app
 var surveyResults = [{A: 0, B: 0, C: 0, D: 0}];
 
-// video library
+// video library app
 var library = [];
 
 // long-poll message queues
 var pollers = {};
 var nextPollID = 0;
 
-
+// express setup
 var app = express();
 app.set('port', webport);
 app.set('view engine', 'ejs');
@@ -51,11 +51,12 @@ app.use(cookieSession('WCMSSession'));
 app.use(express.static('static'));
 app.get('/poll/:id', longpoll);
 
+// begin logging
 app.use(logger('dev'));
 app.use(errorHandler({showStack: true, dumpExceptions: true}));
 app.use(bodyParser.json({strict: false}));
 
-// web interface
+// pages
 app.get('/', function(req, res) {
 	res.render('index');
 });
@@ -64,6 +65,7 @@ app.get('/survey', function(req, res) {
 	res.render('survey');
 });
 
+// API
 app.post('/laptopOn', function(req, res) {
 	broadcast('laptop', 1);
 	res.sendStatus(200);
@@ -74,7 +76,6 @@ app.post('/laptopOff', function(req, res) {
 	res.sendStatus(200);
 });
 
-
 app.post('/survey', function(req, res) {
 	var responses = req.body.responses;
 	for (var i=0; i<responses.length; i++) {
@@ -82,8 +83,6 @@ app.post('/survey', function(req, res) {
 	}
 	broadcast('survey', surveyResults);
 	return res.sendStatus(200);
-	
-	res.sendStatus(404); // not a valid response
 });
 
 app.get('/surveyResults', function(req, res) {
@@ -94,7 +93,7 @@ app.get('/surveyResults', function(req, res) {
 function longpoll(req, res) {
 	var id = req.params.id;
 	var resp = {msgs: [], id: id};
-	if (!pollers[id]) {
+	if (!pollers[id]) { // first-time caller?
 		console.log('creating poll ID', nextPollID, 'for', id);
 		
 		id = nextPollID++;
@@ -103,21 +102,23 @@ function longpoll(req, res) {
 		resp.msgs = initialMsgs();
 		return res.send(resp);
 		
-	} else if (pollers[id]) {
+	} else { // check their message queue
 		pollers[id].last = new Date();
 		if (pollers[id].q.length > 0) {
 			resp.msgs = pollers[id].q;
 			pollers[id].q = [];
 			return res.send(resp); // immediate response
 		} else {
-			pollers[id].pending = res; // postpone response
+			if (pollers[id].pending) 
+				pollers[id].pending.send({msgs: [], id: id}); // how did that happen?
+			
+			pollers[id].pending = res; // postpone response until data is available
 			return;
 		}
-	} else {
-		return res.sendStatus(404);
 	}
 }
 
+// handle long poll timeouts and housekeeping
 setInterval(() => {
 	var now = new Date();
 	Object.keys(pollers).forEach(id => {
@@ -125,6 +126,7 @@ setInterval(() => {
 			// keepalive -- this interval is low so the Scala Python script has a chance to exit properly when requested
 			pollers[id].pending.send({id: id, msgs: []});
 			pollers[id].pending = null;
+			
 		} else if (now - pollers[id].last > 30*1000) {
 			// nobody is polling this ID anymore, delete it
 			console.log('expiring poll ID', id);
@@ -133,7 +135,8 @@ setInterval(() => {
 	});
 }, 1000);
 
-// proxy Scala content requests so we can set the session cookie -- works for thumbnails, not videos
+// proxy Scala content requests so we can set the session cookie
+// works for thumbnails but breaks video streaming
 app.get('/scala/*', (req, res) => {
 	var url = scalaURL + '/' + req.params[0];
 	console.log('proxying to', url);
@@ -175,6 +178,7 @@ var server = new WebSocket.Server({ port: wsport });
 console.log('Websocket server listening on port ' + wsport);
 
 server.on('connection', function(ws) {
+	// send out the welcome messages
 	initialMsgs().forEach(msg => send(ws, msg));
 
 	ws.on('message', function(msg) {
@@ -243,7 +247,7 @@ crestronClient.on('close', function() {
 crestronClient.on('error', function() {
 	console.log('crestron client connection refused');
 });
-//crestronConnect();
+crestronConnect();
 
 setInterval(function() {
 	if (crestronConnected)
@@ -251,18 +255,20 @@ setInterval(function() {
 }, 30*1000);
 
 
-// scala API
-
+// pull media item list from Scala API for video library demo
 function refreshScala() {
 	scala.login(scalaURL, scalaUser, scalaPass, function(err) {
+		if (err) return console.log('Scala login failed');
 		scala.listVideos(scalaCategory, function(err, res) {
 			if (err) return console.log('failed to refresh videos:', err);
+			
+			// client browser needs these cookies set in order to stream video directly from Scala Content Manager
 			broadcast('token', scalaURL + '/cookie.html#' + scala.cookies());
-			library = [];
-			res.forEach(video => {
-				library.push({name: video.name, filename: video.mediaItemFiles[0].filename,
+			
+			library = res.map(video => {
+				{name: video.name, filename: video.mediaItemFiles[0].filename,
 					url: scalaURL + video.downloadPath, 
-					thumb: scalaURL + video.thumbnailDownloadPaths.medium});
+					thumb: scalaURL + video.thumbnailDownloadPaths.medium}
 			});
 			console.log('video library updated with ' + library.length + ' videos');
 			broadcast('library', library);
@@ -270,6 +276,5 @@ function refreshScala() {
 	});
 }
 
-// todo: faster
-setInterval(refreshScala, 300*1000);
+setInterval(refreshScala, 30*1000);
 refreshScala();
