@@ -1,0 +1,31 @@
+{
+  "name": "cms",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "dependencies": {
+    "body-parser": "^1.18.2",
+    "connect-multiparty": "^2.1.0",
+    "cookie-parser": "^1.4.3",
+    "cookie-session": "^2.0.0-beta.3",
+    "errorhandler": "^1.5.0",
+    "ejs": "^2.5.7",
+    "express": "^4.16.2",
+    "http-proxy-stream": "^1.0.3",
+    "json5": "^0.5.1",
+    "morgan": "^1.9.0",
+    "request": "^2.83.0",
+    "ws": "^3.3.2"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://jweather@bitbucket.org/jweather/walshcms.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "homepage": "https://bitbucket.org/jweather/walshcms#readme"
+}
